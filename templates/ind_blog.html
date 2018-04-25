@@ -2,7 +2,9 @@
 
 {% block content %}
   
-    <h2 style="text-align:center">{{blog.title}}</h2>
-    <p style="text-align:center">{{blog.body}}</p>
-                
+    <h2>{{blog.title}}</h2>
+    <p>{{blog.body}}</p>
+    <p>Written by: <a href='./blog?id={{blog.id}}'>{{blog.user_blog}}</a></p>
+    <!--<p>Written by: <a href='./blog?username={{user.username}}'>{{user.username}}</a></p>-->
+             
 {% endblock %}
