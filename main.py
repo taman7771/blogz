@@ -20,7 +20,7 @@ class Blog(db.Model):
     def __init__(self, title,body,owner):
         self.title = title
         self.body = body
-        self.owner = owner
+        self.owner_id = owner
 
 class User(db.Model):
 
@@ -103,7 +103,7 @@ def newpost():
         if len(title) == 0 or len(body) == 0:
             flash("Entry can't be empty")
         else:
-            new_blog = Blog(title,body,owner)
+            new_blog = Blog(title,body,owner.id)
             #new_blog = Blog(title,body)
             db.session.add(new_blog)
             db.session.commit()
@@ -118,13 +118,16 @@ def blog():
 
     if (request.args.get('id')):
         x = int(request.args.get('id'))
-        user_blog = User.query.filter_by(username=session['username']).first()
         blog = Blog.query.get(x)
         return render_template('ind_blog.html',title="Blogz!", 
         blog=blog)
+    elif (request.args.get('user')):
+        y = int(request.args.get('user'))
+        blogs = Blog.query.filter_by(owner_id=y).all()
+        return render_template('blog.html',title="Blogz!", 
+        blogs=blogs)
     else:
         blogs = Blog.query.all()
-        user_blog = User.query.filter_by(username=session['username']).first()
         return render_template('blog.html',title="Blogz!", 
         blogs=blogs)
 
@@ -133,8 +136,8 @@ def blog():
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    users = User.query.filter_by(username=session['username']).all()
-    return render_template('index.html',title="Blogz!")
+    users = User.query.all()
+    return render_template('index.html',title="Blogz!",users=users)
 
 @app.route('/logout')
 def logout():

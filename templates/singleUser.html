@@ -7,3 +7,7 @@ for blog in blogs:
 def logged_in_user():
     owner = User.query.filter_by(email=session['user']).first()
     return owner
+
+<!--<p>Written by: <a href='./blog?username={{user.username}}'>{{user.username}}</a></p>-->
+
+<li><a href='./?id={{id}}'>{{i}}</a></li>
