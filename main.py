@@ -33,12 +33,15 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+
+allowed_routes = ['login','signup','blog','index','logout']
+
 @app.before_request
 def require_login():
-    allowed_routes = ['login','signup','blog','index','logout']
-    if request.endpoint not in allowed_routes and 'username' not in session:
-        return redirect('/login')
-
+    #allowed_routes = ['login','signup','blog','index','logout']
+    #if request.endpoint not in allowed_routes and 'username' not in session:
+    if not ('username' in session or request.endpoint in allowed_routes):
+        return redirect('/login')  
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -64,33 +67,39 @@ def signup():
         verify = request.form['verify']
     
         #empty entry validation
-        if len(username) == 0 or len(password) == 0:
-            flash('Entries are invalid!')
+        #if len(username) == 0 or len(password) == 0:
+            #flash('Entries are invalid!')
     
         #Username validation
         if len(username) < 3:
             flash("Invalid User Name!")
                    
         #Password validation
-        if len(password) < 3:
+        elif len(password) < 3:
             flash("Invalid Password!")
            
         #Password verification
-        if  password != verify:
+        elif  password != verify:
             flash('Password not matching!')
              
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
-            new_user = User(username, password)
-            db.session.add(new_user)
-            db.session.commit()
-            session['username'] = username
-            return render_template('new_post.html',title="Blogz!")
         else:
-            flash('Username already exists!')
+            existing_user = User.query.filter_by(username=username).first()
+            if not existing_user:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return render_template('new_post.html',title="Blogz!")
+            else:
+                flash('Username already exists!')
             
     return render_template('signup.html',title="Blogz!")
-            
+
+@app.route('/logout')
+def logout():
+    if 'username' in session['username']:
+        del session['username']
+    return redirect('/')           
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -132,19 +141,12 @@ def blog():
         blogs=blogs)
 
 
-
-
 @app.route('/', methods=['POST', 'GET'])
 def index():
     users = User.query.all()
     return render_template('index.html',title="Blogz!",users=users)
 
-@app.route('/logout')
-def logout():
-    if 'username' in session['username']:
-        del session['username']
-    return redirect('/')
-    
+ 
 
 if __name__ == '__main__':
     app.run()
